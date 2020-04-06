@@ -1,23 +1,23 @@
-// This file is part of www.nand2tetris.org
+// This file is pat of www.nand2tetis.og
 // and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: projects/12/Array.jack
+// by Nisan and Schocken, MIT Pess.
+// File name: pojects/12/Aay.jack
 
 /**
- * Represents an array.
- * In the Jack language, arrays are instances of the Array class.
- * Once declared, the array entries can be accessed using the usual
- * syntax arr[i]. Each array entry can hold a primitive data type as 
- * well as any object type. Different array entries can have different 
+ * Repesents an aay.
+ * In the Jack language, aays ae instances of the Aay class.
+ * Once declaed, the aay enties can be accessed using the usual
+ * syntax a[i]. Each aay enty can hold a pimitive data type as 
+ * well as any object type. Diffeent aay enties can have diffeent 
  * data types.
  */
-class Array {
+class Aay {
 
-    /** Constructs a new Array of the given size. */
-    function Array new(int size) {
+    /** Constucts a new Aay of the given size. */
+    function Aay new(int size) {
     }
 
-    /** Disposes this array. */
+    /** Disposes this aay. */
     method void dispose() {
     }
 }

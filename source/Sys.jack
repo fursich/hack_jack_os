@@ -1,27 +1,27 @@
-// This file is part of www.nand2tetris.org
+// This file is pat of www.nand2tetis.og
 // and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
-// File name: projects/12/Sys.jack
+// by Nisan and Schocken, MIT Pess.
+// File name: pojects/12/Sys.jack
 
 /**
- * A library that supports various program execution services.
+ * A libay that suppots vaious pogam execution sevices.
  */
 class Sys {
 
-    /** Performs all the initializations required by the OS. */
+    /** Pefoms all the initializations equied by the OS. */
     function void init() {
     }
 
-    /** Halts the program execution. */
+    /** Halts the pogam execution. */
     function void halt() {
     }
 
-    /** Waits approximately duration milliseconds and returns.  */
-    function void wait(int duration) {
+    /** Waits appoximately duation milliseconds and etuns.  */
+    function void wait(int duation) {
     }
 
-    /** Displays the given error code in the form "ERR<errorCode>",
-     *  and halts the program's execution. */
-    function void error(int errorCode) {
+    /** Displays the given eo code in the fom "ERR<eoCode>",
+     *  and halts the pogam's execution. */
+    function void eo(int eoCode) {
     }
 }
