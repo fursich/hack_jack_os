@@ -18,11 +18,35 @@ class Output {
 
     // Character map for displaying characters
     static Array charMaps;
+    static Array screen;
+    static int line;
+    static int col;
+    static int MaxLine;
+    static int MaxCol;
+    static int MaxRow; // # of rows within a charactor cell
+
+    static int ColPerWord;
+    static int OffsetPerSingleRow;
+    static int OffsetPerLine;
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
-    function void init() {
-    }
 
+    function void init() {
+      let screen = 16384;
+      let line = 0;
+      let col  = 0;
+      let MaxLine = 22;
+      let MaxCol = 63;
+      let MaxRow = 11;
+
+      let OffsetPerSingleRow = 32;
+      let OffsetPerLine = OffsetPerSingleRow * 11;
+      let ColPerWord = 16 / 8;
+
+      do Output.initMap();
+
+      return;
+    }
     // Initializes the character map array
     function void initMap() {
         var int i;
@@ -71,7 +95,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        do Output.create(65,12,30,51,51,63,51,51,51,51,0,0); // A
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -137,15 +161,15 @@ class Output {
         do Output.create(125,7,12,12,12,56,12,12,12,7,0,0);    // }
         do Output.create(126,38,45,25,0,0,0,0,0,0,0,0);        // ~
 
-	return;
+        return;
     }
 
     // Creates the character map array of the given character index, using the given values.
     function void create(int index, int a, int b, int c, int d, int e,
                          int f, int g, int h, int i, int j, int k) {
-	var Array map;
+        var Array map;
 
-	let map = Array.new(11);
+        let map = Array.new(11);
         let charMaps[index] = map;
 
         let map[0] = a;
@@ -173,31 +197,156 @@ class Output {
         return charMaps[c];
     }
 
+    // Advances cursor by 1
+    function void moveCursorForward() {
+
+      if(col < MaxCol) {
+        let col = col + 1;
+      } else {
+        do Output.lineFeed();
+      }
+
+      return;
+    }
+
+    // Pulls back cursor by 1
+    function void moveCursorBackward() {
+
+      if(col > 0) {
+        let col = col - 1;
+      } else {
+        // nop (no returning further upwards)
+      }
+
+      return;
+    }
+
+    // reset cursor column and advances line by +1
+    function void lineFeed() {
+
+      let col = 0;
+      if(line < MaxLine) {
+        let line = line + 1;
+      } else {
+        // TODO: maybe shift screen upwards
+        let line = 0;
+      }
+
+      return;
+    }
+
+    // Returns the screen address that is specifed by current cursor, plus row number.
+    function int getScreenAddress(int row) {
+      return (line * OffsetPerLine) + (row * OffsetPerSingleRow) + (col / ColPerWord);
+    }
+
+    // Overwrites a single row on the screen, depending on upper / lower bits of the word
+    function void setSingleRow(int bitmap, int address, boolean leftward) {
+
+      // NOTE: LSB being left, MSB coming rightward (reversed order)
+      // bitmaps are made in reversed order, but be careful to reverse the column order as well
+      if(leftward) {
+        let screen[address] = (screen[address] & -256) + bitmap; // masking with -256 = 0xFF00
+      } else {
+        let screen[address] = (screen[address] & 255) + (bitmap * 256);
+      }
+
+      return;
+    }
+
+    // Displays a charactor onto the current cursor position
+    // Cursor position not affected by this function
+    function void insertChar(char c) {
+      var Array map;
+      var boolean leftward;
+      var int row, address;
+
+      let map = Output.getMap(c);
+
+      if((col - ((col / ColPerWord) * ColPerWord)) = 0) {
+        let leftward = true;
+      } else {
+        let leftward = false;
+      }
+
+      let row = 0;
+      while(row<MaxRow) {
+        let address = Output.getScreenAddress(row);
+        do Output.setSingleRow(map[row], address, leftward);
+
+        let row = row + 1;
+      }
+
+      return;
+    }
+
+    function void insertBlank() {
+      do Output.insertChar(32);
+      return;
+    }
+
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+
+      if ((i < 0) | (i > MaxLine) | (j < 0) | (j > MaxCol)) {
+        do Sys.error(20);
+        return;
+      }
+
+      let line = i;
+      let col = j;
+      do Output.insertBlank();
+
+      return;
     }
 
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
+      do Output.insertChar(c);
+      do Output.moveCursorForward();
+
+      return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+      var int i;
+
+      let i = 0;
+      while(i < s.length()) {
+        do Output.printChar(s.charAt(i));
+        let i = i + 1;
+      }
+      return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+      var String s;
+      
+      let s = String.new(6);
+      do s.setInt(i);
+      do Output.printString(s);
+
+      do s.dispose();
+      return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+      do Output.lineFeed();
+      return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+      do Output.moveCursorBackward();
+      do Output.insertBlank();
+
+      return;
     }
 }
